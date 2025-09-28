@@ -1,7 +1,10 @@
 package todo_alpha.todo_alpha.todo.service
 
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
 import todo_alpha.todo_alpha.todo.domain.Todo
+import todo_alpha.todo_alpha.todo.dto.TodoPageResponseDto
 import todo_alpha.todo_alpha.todo.dto.TodoRequestDto
 import todo_alpha.todo_alpha.todo.dto.TodoResponseDto
 import todo_alpha.todo_alpha.todo.repository.TodoRepository
@@ -14,29 +17,64 @@ class TodoService (
 
     // create
     fun createTodo(
-        request: TodoRequestDto
-    ): Todo {
-        // 검증 하는 IF문
-        if (request.content == null) throw IllegalArgumentException("Content is required")
+        todoRequestDto: TodoRequestDto
+    ): TodoResponseDto {
         val todo = Todo(
-            title = request.title,
-            content = request.content,
-            dueDate = request.dueDate,
+            title = todoRequestDto.title,
+            content = todoRequestDto.content,
+            dueDate = todoRequestDto.dueDate,
             isCompleted = false,
             createdAt = LocalDateTime.now(),
         )
-        return todoRepository.save(todo)
+        val saveTodo = todoRepository.save(todo)
+        return TodoResponseDto(saveTodo)
     }
 
     // read
     fun getAllTodos(): List<TodoResponseDto> {
-        val todos = todoRepository.findByDeletedAtIsNull()
+        return todoRepository.findByDeletedAtIsNull().map { todo ->
+            TodoResponseDto(
+                id = todo.id!!,
+                title = todo.title,
+                content = todo.content,
+                dueDate = todo.dueDate,
+                isCompleted = todo.isCompleted,
+                createdAt = todo.createdAt,
+            )
+        }
+    }
+
+    fun getTodosWithPaging(page: Int, size: Int): TodoPageResponseDto {
+
+        val pageable = PageRequest.of(page, size, Sort.by("createdAt").descending())
+        val todoPage = todoRepository.findByDeletedAtIsNull(pageable)
+
+        val todoResponseList = todoPage.content.map { todo ->
+            TodoResponseDto(
+                id = todo.id!!,
+                title = todo.title,
+                content = todo.content,
+                dueDate = todo.dueDate,
+                isCompleted = todo.isCompleted,
+                createdAt = todo.createdAt,
+                )
+        }
+        return TodoPageResponseDto(
+            content = todoResponseList,
+            totalElements = todoPage.totalElements,
+            totalPages = todoPage.totalPages,
+            currentPage = todoPage.number,
+            size = todoPage.size,
+            hasNextPage = todoPage.hasNext(),
+            hasPreviousPage = todoPage.hasPrevious()
+        )
     }
 
     // 상세
     fun getTodoById(id: Long): TodoResponseDto {
         val todo = todoRepository.findByIdAndDeletedAtIsNull(id)
             ?: throw IllegalArgumentException("Todo not found: $id")
+        return TodoResponseDto(todo)
     }
 
     // delete

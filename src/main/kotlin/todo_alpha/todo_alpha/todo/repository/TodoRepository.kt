@@ -1,5 +1,7 @@
 package todo_alpha.todo_alpha.todo.repository
 
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 import todo_alpha.todo_alpha.todo.domain.Todo
@@ -15,4 +17,7 @@ interface TodoRepository : JpaRepository<Todo, Long>{
 
     // 삭제 확인용
     fun existsByIdAndDeletedAtIsNull(id: Long): Boolean
+
+    // 페이징
+    fun findByDeletedAtIsNull(pageable: Pageable): Page<Todo>
 }

@@ -4,9 +4,7 @@ import java.time.LocalDateTime
 
 data class TodoRequestDto (
     val title: String,
-    val content: String?,
+    val content: String,
     val dueDate: LocalDateTime?
-) {
-
-}
+)
 

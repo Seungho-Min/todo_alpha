@@ -20,6 +20,15 @@ repositories {
 	mavenCentral()
 }
 
+// spring cloud 의존성 추가
+val springCloudVersion by extra("2025.0.0")
+
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.cloud:spring-cloud-dependencies:$springCloudVersion")
+    }
+}
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
@@ -29,6 +38,9 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    // open feign 의존성 추가
+    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
+    implementation("com.github.f4b6a3:ulid-creator:5.2.0")
 }
 
 kotlin {
