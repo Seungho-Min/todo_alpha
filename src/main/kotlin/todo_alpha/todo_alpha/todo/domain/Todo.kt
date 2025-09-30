@@ -2,9 +2,12 @@ package todo_alpha.todo_alpha.todo.domain
 
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import org.hibernate.annotations.SQLDelete
 import java.time.LocalDateTime
@@ -20,7 +23,9 @@ class Todo (
     dueDate: LocalDateTime? = null,
     isCompleted: Boolean,
     createdAt: LocalDateTime,
+    user: User,
 ) {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long? = null
@@ -46,9 +51,21 @@ class Todo (
     var createdAt: LocalDateTime = createdAt
     protected set
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    var user: User = user
+    protected set
 
     // 소프트 딜리트용
     @Column(name = "deleted_at")
     var deletedAt: LocalDateTime? = null
-    protected set
+        protected set
+
+
+    // todo update function
+    fun update(title: String, content: String, dueDate: LocalDateTime?) {
+        this.title = title
+        this.content = content
+        this.dueDate = dueDate
+    }
 }

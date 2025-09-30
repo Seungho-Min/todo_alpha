@@ -72,7 +72,7 @@ class CulturalEventService(
         val placeInfo = PlaceInfo(
             placeName = row.PLACE,
             placeAddress = row.GUNAME, // API 응답에 따라 상세 주소 필드로 변경
-            placeCity = "서울특별시",
+            placeCity = "서울특별시", // 서울 정보이기에 고정
             placeDistrict = row.GUNAME,
             placeLatitude = row.LAT?.toDoubleOrNull(),
             placeLongitude = row.LOT?.toDoubleOrNull(),
@@ -102,17 +102,30 @@ class CulturalEventService(
     }
 
     private fun mapToCategory(codename: String?): EventCategory {
-        return when (codename) {
+        return when (codename?.trim()) {
             "뮤지컬/오페라" -> EventCategory.MUSICAL
             "연극" -> EventCategory.THEATER
             "영화" -> EventCategory.MOVIE
             "전시/미술" -> EventCategory.EXHIBITION
+
             "콘서트", "클래식", "국악", "무용" -> EventCategory.CONCERT
+
             "축제-문화/예술", "축제-전통/역사", "축제-기타", "축제" -> EventCategory.FESTIVAL
+
             "교육/체험" -> EventCategory.WORKSHOP
+            "봉사" -> EventCategory.VOLUNTEER
+            "독서" -> EventCategory.READING
+            "스포츠" -> EventCategory.SPORTS
+            "여행" -> EventCategory.TRAVEL
+            "야외활동" -> EventCategory.OUTDOOR
+            "취미" -> EventCategory.HOBBY
+            "스터디" -> EventCategory.STUDY
+            "네트워킹" -> EventCategory.NETWORKING
+
             else -> EventCategory.OTHER
         }
     }
+
 
     private fun parseDateTime(dateTimeStr: String?): LocalDateTime? {
         if (dateTimeStr.isNullOrBlank()) return null

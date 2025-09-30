@@ -41,6 +41,7 @@ dependencies {
     // open feign 의존성 추가
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
     implementation("com.github.f4b6a3:ulid-creator:5.2.0")
+    implementation("org.springframework.boot:spring-boot-starter-security")
 }
 
 kotlin {

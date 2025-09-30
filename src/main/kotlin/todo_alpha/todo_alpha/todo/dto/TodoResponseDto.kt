@@ -10,7 +10,8 @@ data class TodoResponseDto (
     val content: String,
     val dueDate: LocalDateTime?,
     val isCompleted: Boolean,
-    val createdAt: LocalDateTime
+    val createdAt: LocalDateTime,
+    val authorName: String
 ) {
     constructor(todo: Todo) : this(
         id = todo.id!!,
@@ -18,6 +19,7 @@ data class TodoResponseDto (
         content = todo.content,
         dueDate = todo.dueDate,
         isCompleted = todo.isCompleted,
-        createdAt = todo.createdAt
+        createdAt = todo.createdAt,
+        authorName = todo.user.name
     )
 }
