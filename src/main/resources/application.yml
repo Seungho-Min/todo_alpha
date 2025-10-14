@@ -3,9 +3,9 @@ spring:
     name: todo_alpha
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/todo_alpha
-    username: postgres
-    password: 1234
+    url: jdbc:postgresql://localhost:5432/archive
+    username: archive_user
+    password: archive_password
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -34,5 +34,5 @@ logging:
 
 seoul:
   base-url: "http://openapi.seoul.go.kr:8088"
-  api-key: "70766e7558646c77313236557362656a"   # 환경변수로 주입 권장
-  type: "json"                   # json 또는 xml
+  api-key: "70766e7558646c77313236557362656a"
+  type: "json"

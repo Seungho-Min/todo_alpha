@@ -1,6 +1,7 @@
 package todo_alpha.todo_alpha.feignTest.service
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import todo_alpha.todo_alpha.feignTest.client.CulturalEventClient
@@ -9,7 +10,7 @@ import todo_alpha.todo_alpha.feignTest.domain.PublicEvent
 import todo_alpha.todo_alpha.feignTest.domain.embeddable.AudienceMeta
 import todo_alpha.todo_alpha.feignTest.domain.embeddable.PlaceInfo
 import todo_alpha.todo_alpha.feignTest.domain.enums.EventCategory
-import todo_alpha.todo_alpha.feignTest.domain.repository.EvetImageRepository
+import todo_alpha.todo_alpha.feignTest.domain.repository.EventImageRepository
 import todo_alpha.todo_alpha.feignTest.domain.repository.PublicEventRepository
 import todo_alpha.todo_alpha.feignTest.dto.CulturalEventInfoResponse
 import java.time.LocalDateTime
@@ -20,11 +21,13 @@ import java.time.format.DateTimeParseException
 class CulturalEventService(
     private val culturalEventClient: CulturalEventClient,
     private val publicEventRepository: PublicEventRepository,
-    private val eventImageRepository: EvetImageRepository,
+    private val eventImageRepository: EventImageRepository,
     private val objectMapper: ObjectMapper,
     @Value("\${seoul.api-key}") private val apiKey: String,
     @Value("\${seoul.type:json}") private val type: String,
 ) {
+    private val logger = LoggerFactory.getLogger(this::class.java)
+
     fun fetchAndSaveEvents(
         start: Int,
         end: Int,
@@ -65,6 +68,39 @@ class CulturalEventService(
             }
             eventImageRepository.saveAll(eventImages)
         }
+    }
+
+    fun fetchAllEventsAndSave() {
+        // api 최대 허용치 1000 설정
+        val pageSize = 1000
+
+        logger.info("Fetching total event count...")
+        val initialResponse = culturalEventClient.getEvents(key = apiKey, type = type, startIndex = 1, endIndex = 1)
+        val totalCount = initialResponse.culturalEventInfo?.list_total_count ?: 0
+
+        if (totalCount == 0) {
+            logger.info("No events to fetch")
+            return
+        }
+        logger.info("Total event to fetch: $totalCount")
+
+        var startIndex = 1
+        while (startIndex <= totalCount) {
+            val endIndex = (startIndex + pageSize-1).coerceAtMost(totalCount)
+            logger.info("Fetching events from $startIndex to $endIndex...")
+
+            try {
+                // 기존 페이지 단위 조회 및 저장 로직 재사용.
+                fetchAndSaveEvents(start = startIndex, end = endIndex)
+            } catch (e: Exception) {
+                // 특정 페이지에서 에러 발생 시 로그 남기고 다음 페이지로 넘어감.
+                logger.error("Error while fetching events from $startIndex to $endIndex", e)
+            }
+
+            // 다음 페이지 시작 인덱스로 이동.
+            startIndex += pageSize
+        }
+        logger.info("Finished fetching all events.")
     }
 
     private fun mapRowToPublicEvent(row: CulturalEventInfoResponse.Row, sourceEventId: String): PublicEvent {
